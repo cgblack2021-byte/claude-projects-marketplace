@@ -12,12 +12,12 @@ export const metadata: Metadata = {
     template: "%s · Claude Projects Marketplace",
   },
   description:
-    "Browse finished projects built on Claude, preview each marketing plan, and buy the ones you want to run with.",
+    "Browse finished projects, preview each marketing plan, and buy the ones you want to run with.",
   icons: { icon: "/favicon.svg" },
   openGraph: {
     title: "Claude Projects Marketplace",
     description:
-      "Browse finished projects built on Claude, preview each marketing plan, and buy the ones you want to run with.",
+      "Browse finished projects, preview each marketing plan, and buy the ones you want to run with.",
     type: "website",
   },
 };

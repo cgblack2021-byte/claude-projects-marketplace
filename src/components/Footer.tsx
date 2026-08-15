@@ -8,7 +8,7 @@ export default function Footer() {
           <Logo className="h-5 w-5" />
           <span>Claude Projects Marketplace</span>
         </div>
-        <p>© {new Date().getFullYear()} — built with Claude.</p>
+        <p>© {new Date().getFullYear()} Claude Projects Marketplace.</p>
       </div>
     </footer>
   );
