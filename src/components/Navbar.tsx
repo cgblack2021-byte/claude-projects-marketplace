@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import Logo from "./Logo";
 
 export default async function Navbar() {
   const supabase = createClient();
@@ -20,7 +21,8 @@ export default async function Navbar() {
   return (
     <header className="border-b border-black/5 bg-white/80 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-        <Link href="/" className="text-lg font-bold tracking-tight">
+        <Link href="/" className="flex items-center gap-2 text-lg font-bold tracking-tight">
+          <Logo className="h-7 w-7" />
           Claude Projects
         </Link>
         <nav className="flex items-center gap-4 text-sm font-medium">

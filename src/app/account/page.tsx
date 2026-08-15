@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatPrice } from "@/lib/format";
+import EmptyState from "@/components/EmptyState";
 
 export const dynamic = "force-dynamic";
 
@@ -32,9 +33,12 @@ export default async function AccountPage() {
 
       <h2 className="mt-8 text-lg font-semibold">Purchased projects</h2>
       {!purchases || purchases.length === 0 ? (
-        <p className="mt-2 text-sm text-ink/50">
-          You haven&apos;t purchased anything yet. <Link href="/" className="text-accent">Browse projects</Link>.
-        </p>
+        <div className="mt-4">
+          <EmptyState
+            title="You haven't purchased anything yet"
+            description="Browse the marketplace and buy a project to see it show up here."
+          />
+        </div>
       ) : (
         <ul className="mt-4 divide-y divide-black/5 rounded-2xl border border-black/5 bg-white">
           {purchases.map((purchase) => {
