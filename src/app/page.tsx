@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import ProjectCard from "@/components/ProjectCard";
 import SearchBar from "@/components/SearchBar";
 import EmptyState from "@/components/EmptyState";
+import { SparkleIcon } from "@/components/icons";
 
 export const dynamic = "force-dynamic";
 
@@ -28,8 +29,12 @@ export default async function HomePage({
   return (
     <div>
       <section className="-mx-4 mb-12 rounded-3xl bg-hero-mesh px-4 py-14 sm:-mx-6 sm:px-10 lg:-mx-8 lg:px-16">
-        <h1 className="max-w-2xl text-4xl font-bold tracking-tight sm:text-5xl">
-          Finished projects, ready for you to run with
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-semibold text-accentDark shadow-sm">
+          <SparkleIcon className="h-3.5 w-3.5" />
+          Built. Tested. Ready to sell.
+        </span>
+        <h1 className="mt-5 max-w-2xl text-4xl font-bold tracking-tight sm:text-5xl">
+          Online businesses, ready for you to run with
         </h1>
         <p className="mt-4 max-w-xl text-ink/60">
           Browse finished projects, preview the marketing plan for each one, and buy the ones
