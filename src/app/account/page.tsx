@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatPrice } from "@/lib/format";
 import EmptyState from "@/components/EmptyState";
+import { DownloadIcon } from "@/components/icons";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +23,7 @@ export default async function AccountPage() {
 
   const projectIds = [...new Set((purchases ?? []).map((p) => p.project_id))];
   const { data: projects } = projectIds.length
-    ? await supabase.from("projects").select("id, slug, name").in("id", projectIds)
+    ? await supabase.from("projects").select("id, slug, name, deliverable_path").in("id", projectIds)
     : { data: [] };
   const projectById = new Map((projects ?? []).map((project) => [project.id, project]));
 
@@ -54,7 +55,18 @@ export default async function AccountPage() {
                     Purchased {new Date(purchase.created_at).toLocaleDateString()}
                   </p>
                 </div>
-                <p className="shrink-0 text-sm font-semibold">{formatPrice(purchase.amount_cents)}</p>
+                <div className="flex shrink-0 items-center gap-4">
+                  {project.deliverable_path && (
+                    <a
+                      href={`/api/download/${project.id}`}
+                      className="flex items-center gap-1 text-sm font-medium text-accentDark hover:underline"
+                    >
+                      <DownloadIcon className="h-3.5 w-3.5" />
+                      Download
+                    </a>
+                  )}
+                  <p className="text-sm font-semibold">{formatPrice(purchase.amount_cents)}</p>
+                </div>
               </li>
             );
           })}

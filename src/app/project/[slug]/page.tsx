@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { formatPrice } from "@/lib/format";
 import BuyButton from "@/components/BuyButton";
 import Logo from "@/components/Logo";
-import { CheckCircleIcon, LockIcon } from "@/components/icons";
+import { CheckCircleIcon, DownloadIcon, LockIcon } from "@/components/icons";
 
 export const dynamic = "force-dynamic";
 
@@ -89,10 +89,22 @@ export default async function ProjectPage({ params }: { params: { slug: string }
 
         <div className="mt-6">
           {hasPurchased ? (
-            <p className="flex items-center justify-center gap-1.5 rounded-full bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700">
-              <CheckCircleIcon className="h-4 w-4" />
-              You own this project
-            </p>
+            <div className="space-y-3">
+              <p className="flex items-center justify-center gap-1.5 rounded-full bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700">
+                <CheckCircleIcon className="h-4 w-4" />
+                You own this project
+              </p>
+              {project.deliverable_path ? (
+                <a href={`/api/download/${project.id}`} className="btn-primary w-full">
+                  <DownloadIcon className="mr-1.5 h-4 w-4" />
+                  Download project files
+                </a>
+              ) : (
+                <p className="text-center text-xs text-ink/40">
+                  Project files aren&apos;t uploaded yet — check back soon.
+                </p>
+              )}
+            </div>
           ) : (
             <>
               <BuyButton projectId={project.id} isLoggedIn={!!user} />

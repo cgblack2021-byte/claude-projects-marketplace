@@ -47,6 +47,22 @@ async function uploadThumbnail(
   return data.publicUrl;
 }
 
+async function uploadDeliverable(
+  supabase: Awaited<ReturnType<typeof requireAdmin>>,
+  slug: string,
+  file: File
+) {
+  const ext = file.name.split(".").pop() || "zip";
+  const path = `${slug}-${Date.now()}.${ext}`;
+  const { error } = await supabase.storage.from("deliverables").upload(path, file, {
+    cacheControl: "3600",
+    upsert: true,
+    contentType: file.type || undefined,
+  });
+  if (error) throw new Error(`Deliverable upload failed: ${error.message}`);
+  return path;
+}
+
 function readProjectFields(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   const slugInput = String(formData.get("slug") ?? "").trim();
@@ -67,10 +83,15 @@ export async function createProject(formData: FormData) {
   const supabase = await requireAdmin();
   const fields = readProjectFields(formData);
 
-  const file = formData.get("thumbnail") as File | null;
-  const thumbnail_url = file && file.size > 0 ? await uploadThumbnail(supabase, fields.slug, file) : null;
+  const thumbnailFile = formData.get("thumbnail") as File | null;
+  const thumbnail_url =
+    thumbnailFile && thumbnailFile.size > 0 ? await uploadThumbnail(supabase, fields.slug, thumbnailFile) : null;
 
-  const { error } = await supabase.from("projects").insert({ ...fields, thumbnail_url });
+  const deliverableFile = formData.get("deliverable") as File | null;
+  const deliverable_path =
+    deliverableFile && deliverableFile.size > 0 ? await uploadDeliverable(supabase, fields.slug, deliverableFile) : null;
+
+  const { error } = await supabase.from("projects").insert({ ...fields, thumbnail_url, deliverable_path });
   if (error) throw new Error(error.message);
 
   revalidatePath("/");
@@ -82,10 +103,21 @@ export async function updateProject(id: string, formData: FormData) {
   const supabase = await requireAdmin();
   const fields = readProjectFields(formData);
 
-  const file = formData.get("thumbnail") as File | null;
-  const thumbnail_url = file && file.size > 0 ? await uploadThumbnail(supabase, fields.slug, file) : undefined;
+  const thumbnailFile = formData.get("thumbnail") as File | null;
+  const thumbnail_url =
+    thumbnailFile && thumbnailFile.size > 0 ? await uploadThumbnail(supabase, fields.slug, thumbnailFile) : undefined;
 
-  const update = thumbnail_url ? { ...fields, thumbnail_url } : fields;
+  const deliverableFile = formData.get("deliverable") as File | null;
+  const deliverable_path =
+    deliverableFile && deliverableFile.size > 0
+      ? await uploadDeliverable(supabase, fields.slug, deliverableFile)
+      : undefined;
+
+  const update = {
+    ...fields,
+    ...(thumbnail_url !== undefined ? { thumbnail_url } : {}),
+    ...(deliverable_path !== undefined ? { deliverable_path } : {}),
+  };
 
   const { error } = await supabase.from("projects").update(update).eq("id", id);
   if (error) throw new Error(error.message);

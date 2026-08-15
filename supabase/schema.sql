@@ -53,10 +53,15 @@ create table if not exists public.projects (
   summary text not null default '',
   marketing_plan_preview text not null default '',
   marketing_plan_full text not null default '',
+  deliverable_path text,
   is_published boolean not null default true,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- Safe to re-run: adds the column to a projects table that already existed
+-- before deliverable_path was introduced.
+alter table public.projects add column if not exists deliverable_path text;
 
 alter table public.projects enable row level security;
 
@@ -135,6 +140,32 @@ create policy "admins can update thumbnails"
   on storage.objects for update
   using (
     bucket_id = 'thumbnails'
+    and exists (select 1 from public.profiles p where p.id = auth.uid() and p.is_admin)
+  );
+
+-- ---------------------------------------------------------------------------
+-- Private storage bucket for the actual project deliverables (zips).
+-- Not public: buyers only ever get a short-lived signed URL, generated
+-- server-side after the download route confirms they have a purchase row
+-- for that project. There is deliberately no public/authenticated select
+-- policy here — the download route uses the service-role key, which
+-- bypasses RLS entirely, so no client-facing read path exists.
+-- ---------------------------------------------------------------------------
+insert into storage.buckets (id, name, public)
+values ('deliverables', 'deliverables', false)
+on conflict (id) do nothing;
+
+create policy "admins can upload deliverables"
+  on storage.objects for insert
+  with check (
+    bucket_id = 'deliverables'
+    and exists (select 1 from public.profiles p where p.id = auth.uid() and p.is_admin)
+  );
+
+create policy "admins can update deliverables"
+  on storage.objects for update
+  using (
+    bucket_id = 'deliverables'
     and exists (select 1 from public.profiles p where p.id = auth.uid() and p.is_admin)
   );
 

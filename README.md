@@ -5,7 +5,7 @@ A marketplace where you can list projects you've built on Claude, and users can 
 ## Stack
 
 - **Next.js 14** (App Router, TypeScript, Tailwind CSS)
-- **Supabase** — Postgres database, auth (email/password), and storage (thumbnails)
+- **Supabase** — Postgres database, auth (email/password), and storage (public thumbnails + private deliverables)
 - **Stripe** — Checkout for one-time purchases, webhook to unlock content
 
 ## How it works
@@ -14,16 +14,27 @@ A marketplace where you can list projects you've built on Claude, and users can 
 - `/project/[slug]` — project detail page; shows `marketing_plan_preview` to everyone, and `marketing_plan_full` only to users with a recorded purchase
 - `/signup`, `/login` — Supabase email/password auth
 - `/account` — a signed-in user's purchase history
-- `/admin` — project CRUD (list/create/edit/delete + thumbnail upload), gated to users with `profiles.is_admin = true`
+- `/admin` — project CRUD (list/create/edit/delete + thumbnail + deliverable zip upload), gated to users with `profiles.is_admin = true`
 - `POST /api/checkout` — creates a Stripe Checkout Session for the logged-in user
 - `POST /api/webhooks/stripe` — on `checkout.session.completed`, writes a row to `purchases` using the Supabase service-role key (bypasses RLS)
+- `GET /api/download/[projectId]` — verifies the caller has a `purchases` row for that project, then generates a 60-second signed URL for the project's deliverable zip and redirects to it. The `deliverables` storage bucket is private; this route is the only path to a download link, and it always checks ownership fresh rather than trusting a cached/shared link.
+
+## Delivering the actual project after purchase
+
+Buying a listing only unlocks the marketing plan text by default — it doesn't hand over a working product unless you upload one. For each project you sell:
+
+1. Package the project's source code as a zip, together with its own `schema.sql` (if it has a database) and a copy of [`docs/setup-guide-template.md`](./docs/setup-guide-template.md) filled in for that specific project (swap in the project name, its actual env vars, and whether it needs an admin-bootstrap step).
+2. In `/admin/new` or `/admin/[id]/edit`, upload that zip under **Project files (.zip)**.
+3. Once a buyer purchases, a **Download project files** button appears on the project page and in their `/account` purchase history. Both hit `/api/download/[projectId]`, which checks the buyer actually owns the project before generating a link — download links are never public and expire after 60 seconds.
+
+This makes fulfillment self-serve: buyers set the project up on their own Supabase/hosting accounts by following the guide, the same way you set up this marketplace.
 
 ## Setup
 
 ### 1. Create a Supabase project
 
 1. Create a project at [supabase.com](https://supabase.com).
-2. In the SQL editor, run the entire contents of [`supabase/schema.sql`](./supabase/schema.sql). This creates the `profiles`, `projects`, and `purchases` tables with row-level security, a trigger that creates a `profiles` row on signup, and a public `thumbnails` storage bucket.
+2. In the SQL editor, run the entire contents of [`supabase/schema.sql`](./supabase/schema.sql). This creates the `profiles`, `projects`, and `purchases` tables with row-level security, a trigger that creates a `profiles` row on signup, a public `thumbnails` storage bucket, and a private `deliverables` storage bucket for the actual project files buyers download after purchase.
 3. Under **Project Settings → API**, copy the Project URL, `anon` public key, and `service_role` secret key.
 4. In **Authentication → Providers**, email/password is enabled by default. For local development you can turn off "Confirm email" under **Authentication → Settings** so you don't need to click an email link after signing up.
 

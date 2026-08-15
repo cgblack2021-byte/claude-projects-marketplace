@@ -46,3 +46,12 @@ export function SparkleIcon({ className = "h-4 w-4" }: { className?: string }) {
     </svg>
   );
 }
+
+export function DownloadIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path d="M12 4v11m0 0l-4-4m4 4l4-4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M5 18.5V19a2 2 0 002 2h10a2 2 0 002-2v-.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+    </svg>
+  );
+}

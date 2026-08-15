@@ -88,6 +88,17 @@ export default function ProjectForm({
         <input id="thumbnail" name="thumbnail" type="file" accept="image/*" className="input" />
       </div>
 
+      <div>
+        <label htmlFor="deliverable" className="mb-1 block text-sm font-medium">
+          Project files (.zip) — delivered to buyers after purchase
+          {project?.deliverable_path ? " (leave empty to keep the current file)" : ""}
+        </label>
+        <input id="deliverable" name="deliverable" type="file" accept=".zip" className="input" />
+        {project?.deliverable_path && (
+          <p className="mt-1 text-xs text-ink/50">Current file on record: {project.deliverable_path}</p>
+        )}
+      </div>
+
       <label className="flex items-center gap-2 text-sm font-medium">
         <input
           type="checkbox"

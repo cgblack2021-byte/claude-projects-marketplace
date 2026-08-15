@@ -15,6 +15,7 @@ export type Project = {
   summary: string;
   marketing_plan_preview: string;
   marketing_plan_full: string;
+  deliverable_path: string | null;
   is_published: boolean;
   created_at: string;
   updated_at: string;
